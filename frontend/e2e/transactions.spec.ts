@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { registerUser, loginUser, uniqueEmail, createAccount, navigateTo, TEST_PASSWORD } from './helpers';
+import { registerUser, loginUser, uniqueEmail, createAccount, navigateTo } from './helpers';
 
 test.describe('Transactions', () => {
   let email: string;

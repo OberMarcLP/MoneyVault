@@ -14,6 +14,7 @@ interface ToastContextType {
 
 const ToastContext = createContext<ToastContextType>({ toast: () => {} });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useToast() {
   return useContext(ToastContext);
 }

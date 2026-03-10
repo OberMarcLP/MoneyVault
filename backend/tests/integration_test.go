@@ -108,7 +108,7 @@ func TestIntegration_FullFlow(t *testing.T) {
 	req, _ = http.NewRequest("GET", "/api/v1/auth/me", nil)
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 	router.ServeHTTP(w, req)
-	require.Equal(t, http.StatusOK, w.Code)
+	require.Equal(t, http.StatusOK, w.Code, "GET /auth/me should return 200: %s", w.Body.String())
 
 	var meResp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &meResp)

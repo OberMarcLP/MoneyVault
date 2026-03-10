@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useCSVPreview, useCSVImport, useImportHistory, useAccounts } from '@/api/hooks';
 import { useToast } from '@/components/ui/toast';
@@ -84,21 +84,16 @@ export function ImportPage() {
 
   const accounts = accountsData?.accounts ?? [];
   const history = historyData?.imports ?? [];
-  const [savedTemplates, setSavedTemplates] = useState<ImportTemplate[]>([]);
-
-  useEffect(() => {
+  const [savedTemplates, setSavedTemplates] = useState<ImportTemplate[]>(() => {
     try {
       const raw = localStorage.getItem(IMPORT_TEMPLATES_KEY);
-      if (!raw) {
-        setSavedTemplates([]);
-        return;
-      }
+      if (!raw) return [];
       const parsed = JSON.parse(raw) as ImportTemplate[];
-      setSavedTemplates(Array.isArray(parsed) ? parsed : []);
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
-      setSavedTemplates([]);
+      return [];
     }
-  }, []);
+  });
 
   const applyMapping = useCallback((mapping: CSVImportMapping, posted: boolean) => {
     setMapDate(mapping.date || '');

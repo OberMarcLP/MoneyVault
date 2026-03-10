@@ -204,7 +204,7 @@ export function InvestmentsPage() {
         </div>
       )}
 
-      <DividendsSection holdings={holdings} />
+      <DividendsSection holdings={holdings} onDeleteDividend={setDeletingDividend} />
 
       {/* Add Holding Dialog */}
       <Dialog open={showAdd} onClose={() => setShowAdd(false)}>
@@ -722,11 +722,10 @@ function SellForm({
   );
 }
 
-function DividendsSection({ holdings }: { holdings: Holding[] }) {
+function DividendsSection({ holdings, onDeleteDividend }: { holdings: Holding[]; onDeleteDividend: (info: { id: string; symbol: string }) => void }) {
   const { data: divData } = useDividends();
   const { data: summary } = useDividendSummary();
   const createDividend = useCreateDividend();
-  const deleteDividend = useDeleteDividend();
   const { toast } = useToast();
 
   const [showForm, setShowForm] = useState(false);
@@ -818,7 +817,7 @@ function DividendsSection({ holdings }: { holdings: Holding[] }) {
                       <td className="py-2">{d.pay_date ? formatDate(d.pay_date) : '—'}</td>
                       <td className="py-2">
                         <Button variant="ghost" size="sm" onClick={() =>
-                          setDeletingDividend({ id: d.id, symbol: h?.symbol ?? 'Unknown' })
+                          onDeleteDividend({ id: d.id, symbol: h?.symbol ?? 'Unknown' })
                         }>
                           <Trash2 className="h-3 w-3 text-destructive" />
                         </Button>

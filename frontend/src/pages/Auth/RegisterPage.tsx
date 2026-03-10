@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FormField } from '@/components/ui/FormField';
-import { PasswordStrength, isPasswordStrong } from '@/components/ui/PasswordStrength';
+import { PasswordStrength } from '@/components/ui/PasswordStrength';
+import { isPasswordStrong } from '@/components/ui/password-utils';
 import { useRegister } from '@/api/hooks';
 import { useToast } from '@/components/ui/toast';
 

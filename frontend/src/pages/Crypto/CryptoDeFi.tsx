@@ -13,7 +13,7 @@ import {
 import { useToast } from '@/components/ui/toast';
 import { formatCurrency } from '@/lib/utils';
 import { Plus, Trash2, Layers } from 'lucide-react';
-import type { Holding } from '@/types';
+import type { Holding, CreateHoldingRequest } from '@/types';
 
 function DeFiTab({ holdings, isLoading, onAdd, onDelete }: {
   holdings: Holding[]; isLoading: boolean;
@@ -74,7 +74,7 @@ function DeFiTab({ holdings, isLoading, onAdd, onDelete }: {
 
 function AddDeFiForm({ accounts, onSubmit, isPending }: {
   accounts: { id: string; name: string }[];
-  onSubmit: (data: any) => void;
+  onSubmit: (data: CreateHoldingRequest) => void;
   isPending: boolean;
 }) {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -87,13 +87,13 @@ function AddDeFiForm({ accounts, onSubmit, isPending }: {
       apy: parseFloat(fd.get('apy') as string) || 0,
     });
     onSubmit({
-      account_id: fd.get('account_id'),
+      account_id: fd.get('account_id') as string,
       asset_type: 'defi_position',
       symbol: (fd.get('symbol') as string).toUpperCase(),
-      name: fd.get('name') || '',
+      name: (fd.get('name') as string) || '',
       quantity: parseFloat(fd.get('quantity') as string),
       cost_basis: parseFloat(fd.get('cost_basis') as string),
-      acquired_at: fd.get('acquired_at'),
+      acquired_at: fd.get('acquired_at') as string,
       metadata,
     });
   };

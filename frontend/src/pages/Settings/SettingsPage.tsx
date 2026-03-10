@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -430,27 +430,24 @@ function PushNotificationsSection() {
   const pushSubscribe = usePushSubscribe();
   const pushUnsubscribe = usePushUnsubscribe();
   const [isSubscribed, setIsSubscribed] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [supported, setSupported] = useState(false);
+  const supported = typeof window !== 'undefined' && 'serviceWorker' in navigator && 'PushManager' in window;
+  const [isLoading, setIsLoading] = useState(supported);
 
-  const checkSubscription = useCallback(async () => {
-    if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      setSupported(false);
-      setIsLoading(false);
-      return;
-    }
-    setSupported(true);
-    try {
-      const reg = await navigator.serviceWorker.ready;
-      const sub = await reg.pushManager.getSubscription();
-      setIsSubscribed(!!sub);
-    } catch {
-      // ignore
-    }
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => { checkSubscription(); }, [checkSubscription]);
+  useEffect(() => {
+    if (!supported) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const reg = await navigator.serviceWorker.ready;
+        const sub = await reg.pushManager.getSubscription();
+        if (!cancelled) setIsSubscribed(!!sub);
+      } catch {
+        // ignore
+      }
+      if (!cancelled) setIsLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [supported]);
 
   async function handleEnable() {
     if (!vapidData?.public_key) {

@@ -14,7 +14,7 @@ import {
 import { useToast } from '@/components/ui/toast';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { Plus, Trash2, Repeat, Pause, Play } from 'lucide-react';
-import type { Frequency, TransactionType } from '@/types';
+import type { CreateRecurringRequest, Frequency, TransactionType } from '@/types';
 
 const FREQ_LABELS: Record<Frequency, string> = {
   daily: 'Daily',
@@ -171,7 +171,7 @@ function RecurringForm({
 }: {
   accounts: { id: string; name: string; currency: string }[];
   categories: { id: string; name: string; type: string }[];
-  onSubmit: (data: any) => void;
+  onSubmit: (data: CreateRecurringRequest) => void;
   isPending: boolean;
 }) {
   const [type, setType] = useState<TransactionType>('expense');

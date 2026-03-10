@@ -10,7 +10,7 @@ import { useBudgets, useCreateBudget, useUpdateBudget, useDeleteBudget, useCateg
 import { useToast } from '@/components/ui/toast';
 import { formatCurrency } from '@/lib/utils';
 import { Plus, Trash2, Pencil, PieChart, AlertTriangle } from 'lucide-react';
-import type { Budget, BudgetPeriod } from '@/types';
+import type { Budget, BudgetPeriod, CreateBudgetRequest } from '@/types';
 
 export function BudgetsPage() {
   const { data, isLoading } = useBudgets();
@@ -163,7 +163,6 @@ export function BudgetsPage() {
         </DialogHeader>
         <BudgetForm
           categories={categories}
-          onSuccess={() => setShowCreate(false)}
           onSubmit={(data) => createBudget.mutate(data, {
             onSuccess: () => { toast('Budget created', 'success'); setShowCreate(false); },
             onError: (err) => toast(err.message, 'error'),
@@ -180,7 +179,6 @@ export function BudgetsPage() {
           <BudgetForm
             categories={categories}
             budget={editing}
-            onSuccess={() => setEditing(null)}
             onSubmit={(data) => updateBudget.mutate({ id: editing.id, ...data }, {
               onSuccess: () => { toast('Budget updated', 'success'); setEditing(null); },
               onError: (err) => toast(err.message, 'error'),
@@ -206,13 +204,11 @@ function BudgetForm({
   categories,
   budget,
   onSubmit,
-  onSuccess: _onSuccess,
   isPending,
 }: {
   categories: { id: string; name: string }[];
   budget?: Budget;
-  onSubmit: (data: any) => void;
-  onSuccess: () => void;
+  onSubmit: (data: CreateBudgetRequest) => void;
   isPending: boolean;
 }) {
   const [categoryId, setCategoryId] = useState(budget?.category_id ?? '');

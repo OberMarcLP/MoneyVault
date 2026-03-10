@@ -1,8 +1,10 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { formatCurrency } from '@/lib/utils';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const tooltipFmt = (value: unknown) => [formatCurrency(Number(value ?? 0)), ''];
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const CHART_COLORS = [
   '#6366f1', '#8b5cf6', '#a855f7', '#d946ef', '#ec4899',
   '#f43f5e', '#ef4444', '#f97316', '#eab308', '#22c55e',

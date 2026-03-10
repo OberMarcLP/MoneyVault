@@ -39,27 +39,24 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const clearUser = useAuthStore((s) => s.clearUser);
   const setUser = useAuthStore((s) => s.setUser);
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(!isAuthenticated);
 
   useEffect(() => {
-    if (isAuthenticated) {
-      initAuth().then(async (ok) => {
-        if (!ok) {
-          clearUser();
-        } else {
-          // Refresh user data (role, preferences) from server
-          try {
-            const data = await apiFetch<{ user: User }>('/auth/me');
-            setUser(data.user);
-          } catch {
-            // Keep existing user data if /me fails
-          }
+    if (!isAuthenticated) return;
+    initAuth().then(async (ok) => {
+      if (!ok) {
+        clearUser();
+      } else {
+        // Refresh user data (role, preferences) from server
+        try {
+          const data = await apiFetch<{ user: User }>('/auth/me');
+          setUser(data.user);
+        } catch {
+          // Keep existing user data if /me fails
         }
-        setReady(true);
-      });
-    } else {
+      }
       setReady(true);
-    }
+    });
   }, [isAuthenticated, clearUser, setUser]);
 
   if (!ready) {

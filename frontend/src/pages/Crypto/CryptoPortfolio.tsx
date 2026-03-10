@@ -16,7 +16,7 @@ import {
   Plus, Trash2, Bitcoin, Search, Send,
   ArrowUpRight, ArrowDownRight,
 } from 'lucide-react';
-import type { Holding } from '@/types';
+import type { Holding, CreateHoldingRequest } from '@/types';
 
 function PortfolioTab({ holdings, isLoading, onAdd, onSell, onDelete }: {
   holdings: Holding[]; isLoading: boolean;
@@ -106,7 +106,7 @@ function PortfolioTab({ holdings, isLoading, onAdd, onSell, onDelete }: {
 
 function AddTokenForm({ accounts, onSubmit, isPending }: {
   accounts: { id: string; name: string }[];
-  onSubmit: (data: any) => void;
+  onSubmit: (data: CreateHoldingRequest) => void;
   isPending: boolean;
 }) {
   const [symbol, setSymbol] = useState('');
@@ -117,15 +117,15 @@ function AddTokenForm({ accounts, onSubmit, isPending }: {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
     onSubmit({
-      account_id: fd.get('account_id'),
+      account_id: fd.get('account_id') as string,
       asset_type: 'crypto',
       symbol: (fd.get('symbol') as string).toUpperCase(),
-      name: fd.get('name') || '',
+      name: (fd.get('name') as string) || '',
       quantity: parseFloat(fd.get('quantity') as string),
       cost_basis: parseFloat(fd.get('cost_basis') as string),
-      acquired_at: fd.get('acquired_at'),
-      network: fd.get('network') || '',
-      token_address: fd.get('token_address') || '',
+      acquired_at: fd.get('acquired_at') as string,
+      network: (fd.get('network') as string) || '',
+      token_address: (fd.get('token_address') as string) || '',
     });
   };
 
