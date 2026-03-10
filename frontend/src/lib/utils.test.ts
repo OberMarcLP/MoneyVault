@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { formatCurrency, formatDate, getAccountTypeLabel, getTransactionTypeColor } from './utils';
+import { formatCurrency, formatDate, getAccountTypeLabel } from './utils';
 
 describe('formatCurrency', () => {
   it('formats USD amounts', () => {
@@ -43,17 +43,5 @@ describe('getAccountTypeLabel', () => {
 
   it('returns raw type for unknown types', () => {
     expect(getAccountTypeLabel('unknown')).toBe('unknown');
-  });
-});
-
-describe('getTransactionTypeColor', () => {
-  it('returns correct colors', () => {
-    expect(getTransactionTypeColor('income')).toBe('text-success');
-    expect(getTransactionTypeColor('expense')).toBe('text-destructive');
-    expect(getTransactionTypeColor('transfer')).toBe('text-primary');
-  });
-
-  it('returns empty string for unknown types', () => {
-    expect(getTransactionTypeColor('other')).toBe('');
   });
 });

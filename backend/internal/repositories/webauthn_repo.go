@@ -44,9 +44,3 @@ func (r *WebAuthnRepository) Delete(id, userID uuid.UUID) error {
 	_, err := r.db.Exec(`DELETE FROM webauthn_credentials WHERE id = $1 AND user_id = $2`, id, userID)
 	return err
 }
-
-func (r *WebAuthnRepository) CountByUserID(userID uuid.UUID) (int, error) {
-	var count int
-	err := r.db.Get(&count, `SELECT COUNT(*) FROM webauthn_credentials WHERE user_id = $1`, userID)
-	return count, err
-}

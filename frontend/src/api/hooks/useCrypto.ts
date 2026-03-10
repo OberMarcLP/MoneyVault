@@ -66,13 +66,6 @@ export function useWalletTransactions(walletId: string) {
   });
 }
 
-export function useAllWalletTransactions() {
-  return useQuery({
-    queryKey: ['wallet-transactions', 'all'],
-    queryFn: () => apiFetch<WalletTransaction[]>('/crypto/wallet-transactions'),
-  });
-}
-
 export function useRefreshCryptoPrices() {
   const queryClient = useQueryClient();
   return useMutation({

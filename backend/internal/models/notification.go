@@ -10,12 +10,10 @@ import (
 type NotificationType string
 
 const (
-	NotifBudgetAlert    NotificationType = "budget_alert"
-	NotifPriceAlert     NotificationType = "price_alert"
-	NotifMilestone      NotificationType = "milestone"
-	NotifInfo           NotificationType = "info"
-	NotifImportComplete NotificationType = "import_complete"
-	NotifSummary        NotificationType = "summary"
+	NotifBudgetAlert NotificationType = "budget_alert"
+	NotifPriceAlert  NotificationType = "price_alert"
+	NotifMilestone   NotificationType = "milestone"
+	NotifInfo        NotificationType = "info"
 )
 
 type Notification struct {

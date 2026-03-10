@@ -136,27 +136,3 @@ func (r *AnalyticsRepository) GetAllUserIDs() ([]uuid.UUID, error) {
 	return ids, err
 }
 
-// Monthly income/expense for cash flow
-func (r *AnalyticsRepository) GetMonthlyAverages(userID uuid.UUID, months int) (income float64, expenses float64, err error) {
-	type result struct {
-		Type  string  `db:"type"`
-		Avg   float64 `db:"avg"`
-	}
-	var rows []result
-	err = r.db.Select(&rows,
-		`SELECT type, COALESCE(AVG(monthly_total), 0) as avg FROM (
-			SELECT type, TO_CHAR(date, 'YYYY-MM') as month, SUM(CAST(amount AS NUMERIC)) as monthly_total
-			FROM transactions
-			WHERE user_id = $1 AND type IN ('income', 'expense') AND date >= (NOW() - INTERVAL '1 month' * $2)::date
-			GROUP BY type, TO_CHAR(date, 'YYYY-MM')
-		) sub GROUP BY type`,
-		userID, months)
-	for _, r := range rows {
-		if r.Type == "income" {
-			income = r.Avg
-		} else if r.Type == "expense" {
-			expenses = r.Avg
-		}
-	}
-	return
-}

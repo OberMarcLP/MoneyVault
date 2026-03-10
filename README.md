@@ -5,7 +5,7 @@ A self-hosted, encrypted personal finance platform for budgeting, investments, a
 ## Tech Stack
 
 - **Backend:** Go (Gin), PostgreSQL 16, AES-256-GCM encryption at rest
-- **Frontend:** React 18 (Vite), Tailwind CSS, TanStack Query, Zustand
+- **Frontend:** React 19 (Vite), Tailwind CSS 4, TanStack Query, Zustand
 - **Auth:** Argon2id password hashing, JWT access/refresh tokens, TOTP 2FA
 - **Deployment:** Docker Compose (Caddy + Go API + PostgreSQL)
 
@@ -13,7 +13,7 @@ A self-hosted, encrypted personal finance platform for budgeting, investments, a
 
 ### Prerequisites
 
-- Go 1.21+
+- Go 1.26+
 - Node.js 20+
 - Docker & Docker Compose
 - PostgreSQL 16 (or use Docker)
@@ -77,9 +77,9 @@ moneyvault/
 │       ├── pages/         # Route-level pages
 │       ├── stores/        # Zustand state stores
 │       └── types/         # TypeScript types
-├── docker-compose.yml     # Production deployment
-├── docker-compose.dev.yml # Development (DB only)
-└── Caddyfile              # Reverse proxy config
+├── docker-compose.yml      # Production deployment (GHCR images)
+├── docker-compose.dev.yml  # Development (local build)
+└── docker-compose.test.yml # Test database (port 5433)
 ```
 
 ## API Endpoints

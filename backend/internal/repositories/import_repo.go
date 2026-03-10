@@ -34,20 +34,6 @@ func (r *ImportRepository) CreateWithTx(dbTx *sqlx.Tx, job *models.ImportJob) er
 	return err
 }
 
-func (r *ImportRepository) GetByID(userID, id uuid.UUID) (*models.ImportJob, error) {
-	var job models.ImportJob
-	var mappingBytes []byte
-	err := r.db.QueryRow(`SELECT id, user_id, account_id, filename, status, total_rows, imported_rows,
-		duplicate_rows, error_message, column_mapping, created_at, updated_at
-		FROM import_jobs WHERE id = $1 AND user_id = $2`, id, userID).Scan(
-		&job.ID, &job.UserID, &job.AccountID, &job.Filename, &job.Status, &job.TotalRows,
-		&job.ImportedRows, &job.DuplicateRows, &job.ErrorMessage, &mappingBytes, &job.CreatedAt, &job.UpdatedAt)
-	if err == nil {
-		_ = json.Unmarshal(mappingBytes, &job.ColumnMapping)
-	}
-	return &job, err
-}
-
 func (r *ImportRepository) List(userID uuid.UUID) ([]models.ImportJob, error) {
 	rows, err := r.db.Query(`SELECT id, user_id, account_id, filename, status, total_rows, imported_rows,
 		duplicate_rows, error_message, column_mapping, created_at, updated_at

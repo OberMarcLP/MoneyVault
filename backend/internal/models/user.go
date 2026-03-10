@@ -62,12 +62,6 @@ type LoginResponse struct {
 	E2EKEKSalt      string `json:"e2e_kek_salt,omitempty"`
 }
 
-type EnableE2ERequest struct {
-	Password        string `json:"password" binding:"required"`
-	E2EEncryptedDEK string `json:"e2e_encrypted_dek" binding:"required"`
-	E2EKEKSalt      string `json:"e2e_kek_salt" binding:"required"`
-}
-
 type E2EMigrateDataRequest struct {
 	Accounts     []E2EMigrateAccount     `json:"accounts"`
 	Transactions []E2EMigrateTransaction `json:"transactions"`

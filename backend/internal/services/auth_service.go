@@ -67,7 +67,7 @@ func (s *AuthService) Register(req models.CreateUserRequest) (*models.User, stri
 		return nil, "", fmt.Errorf("failed to generate salt: %w", err)
 	}
 
-	passwordHash := s.hashPassword(req.Password, salt)
+	passwordHash := hashPassword(req.Password, salt)
 
 	dek, err := s.enc.GenerateDEK()
 	if err != nil {
@@ -134,7 +134,7 @@ func (s *AuthService) Login(req models.LoginRequest) (*models.LoginResponse, str
 		return nil, "", errors.New("internal error")
 	}
 
-	passwordHash := s.hashPassword(req.Password, salt)
+	passwordHash := hashPassword(req.Password, salt)
 	storedHash, err := base64.StdEncoding.DecodeString(user.PasswordHash)
 	if err != nil {
 		return nil, "", errors.New("internal error")
@@ -350,62 +350,6 @@ func (s *AuthService) VerifyEmail(userID uuid.UUID) error {
 	return s.userRepo.Update(user)
 }
 
-func (s *AuthService) EnableE2E(userID uuid.UUID, password, e2eEncryptedDEK, e2eKEKSalt string) error {
-	user, err := s.userRepo.GetByID(userID)
-	if err != nil {
-		return errors.New("user not found")
-	}
-
-	// Verify password
-	salt, err := base64.StdEncoding.DecodeString(user.KEKSalt)
-	if err != nil {
-		return errors.New("internal error")
-	}
-	passwordHash := s.hashPassword(password, salt)
-	storedHash, err := base64.StdEncoding.DecodeString(user.PasswordHash)
-	if err != nil {
-		return errors.New("internal error")
-	}
-	if !compareHashes(passwordHash, storedHash) {
-		return errors.New("invalid password")
-	}
-
-	if err := s.userRepo.UpdateE2E(userID, true, e2eEncryptedDEK, e2eKEKSalt); err != nil {
-		return fmt.Errorf("failed to enable E2E: %w", err)
-	}
-
-	s.enc.SetE2EUser(userID, true)
-	return nil
-}
-
-func (s *AuthService) DisableE2E(userID uuid.UUID, password string) error {
-	user, err := s.userRepo.GetByID(userID)
-	if err != nil {
-		return errors.New("user not found")
-	}
-
-	// Verify password
-	salt, err := base64.StdEncoding.DecodeString(user.KEKSalt)
-	if err != nil {
-		return errors.New("internal error")
-	}
-	passwordHash := s.hashPassword(password, salt)
-	storedHash, err := base64.StdEncoding.DecodeString(user.PasswordHash)
-	if err != nil {
-		return errors.New("internal error")
-	}
-	if !compareHashes(passwordHash, storedHash) {
-		return errors.New("invalid password")
-	}
-
-	if err := s.userRepo.UpdateE2E(userID, false, "", ""); err != nil {
-		return fmt.Errorf("failed to disable E2E: %w", err)
-	}
-
-	s.enc.SetE2EUser(userID, false)
-	return nil
-}
-
 func (s *AuthService) CleanupExpiredTokens() (int64, error) {
 	return s.tokenRepo.CleanupExpired()
 }
@@ -429,7 +373,7 @@ func (s *AuthService) generateToken(user *models.User, expiry time.Duration) (st
 	return token.SignedString([]byte(s.cfg.JWTSecret))
 }
 
-func (s *AuthService) hashPassword(password string, salt []byte) []byte {
+func hashPassword(password string, salt []byte) []byte {
 	return argon2.IDKey([]byte(password), salt, 3, 64*1024, 4, 32)
 }
 

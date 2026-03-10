@@ -59,35 +59,3 @@ func (r *BudgetRepository) GetSpentForCategory(userID uuid.UUID, categoryID *uui
 	err := r.db.Get(&total, query, userID, categoryID, periodStart, periodEnd)
 	return total, err
 }
-
-func (r *BudgetRepository) GetSpentByCategories(userID uuid.UUID, categoryIDs []uuid.UUID, periodStart, periodEnd time.Time) (map[uuid.UUID]float64, error) {
-	result := make(map[uuid.UUID]float64)
-	if len(categoryIDs) == 0 {
-		return result, nil
-	}
-
-	type catSpend struct {
-		CategoryID uuid.UUID `db:"category_id"`
-		Total      float64   `db:"total"`
-	}
-
-	query, args, err := sqlx.In(`SELECT category_id, COALESCE(SUM(CAST(amount AS NUMERIC)), 0) as total
-		FROM transactions
-		WHERE user_id = ? AND category_id IN (?) AND type = 'expense'
-		AND date >= ? AND date < ? AND deleted_at IS NULL
-		GROUP BY category_id`, userID, categoryIDs, periodStart, periodEnd)
-	if err != nil {
-		return result, err
-	}
-	query = r.db.Rebind(query)
-
-	var rows []catSpend
-	if err := r.db.Select(&rows, query, args...); err != nil {
-		return result, err
-	}
-
-	for _, r := range rows {
-		result[r.CategoryID] = r.Total
-	}
-	return result, nil
-}

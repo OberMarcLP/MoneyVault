@@ -9,11 +9,8 @@ import (
 type AssetType string
 
 const (
-	AssetStock      AssetType = "stock"
-	AssetETF        AssetType = "etf"
-	AssetCrypto     AssetType = "crypto"
-	AssetMutualFund AssetType = "mutual_fund"
-	AssetDeFi       AssetType = "defi_position"
+	AssetCrypto AssetType = "crypto"
+	AssetDeFi   AssetType = "defi_position"
 )
 
 type Holding struct {

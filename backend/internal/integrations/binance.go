@@ -1,9 +1,6 @@
 package integrations
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -33,18 +30,11 @@ type binanceAccountResponse struct {
 	Balances []binanceBalance `json:"balances"`
 }
 
-// signRequest creates an HMAC-SHA256 signature for Binance API authentication.
-func signRequest(queryString, secret string) string {
-	h := hmac.New(sha256.New, []byte(secret))
-	h.Write([]byte(queryString))
-	return hex.EncodeToString(h.Sum(nil))
-}
-
 // GetBalances fetches all non-zero spot balances from Binance.
 func (c *BinanceClient) GetBalances(apiKey, apiSecret string) ([]ExchangeBalanceResult, error) {
 	timestamp := strconv.FormatInt(time.Now().UnixMilli(), 10)
 	queryString := "timestamp=" + timestamp
-	signature := signRequest(queryString, apiSecret)
+	signature := hmacSHA256(queryString, apiSecret)
 
 	url := fmt.Sprintf("%s/api/v3/account?%s&signature=%s", binanceBaseURL, queryString, signature)
 

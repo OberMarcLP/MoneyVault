@@ -9,7 +9,6 @@ import (
 type ImportStatus string
 
 const (
-	ImportPending    ImportStatus = "pending"
 	ImportProcessing ImportStatus = "processing"
 	ImportCompleted  ImportStatus = "completed"
 	ImportFailed     ImportStatus = "failed"

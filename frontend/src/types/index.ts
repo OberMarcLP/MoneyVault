@@ -416,16 +416,6 @@ export interface CoinGeckoToken {
   name: string;
 }
 
-export interface DeFiMetadata {
-  protocol: string;
-  pool_name: string;
-  token0: string;
-  token1: string;
-  apy: number;
-  rewards_token: string;
-  position_type: string;
-}
-
 // Analytics
 export interface NetWorthSnapshot {
   id: string;

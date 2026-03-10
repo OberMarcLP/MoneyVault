@@ -9,9 +9,8 @@ import (
 type BudgetPeriod string
 
 const (
-	PeriodWeekly  BudgetPeriod = "weekly"
-	PeriodMonthly BudgetPeriod = "monthly"
-	PeriodYearly  BudgetPeriod = "yearly"
+	PeriodWeekly BudgetPeriod = "weekly"
+	PeriodYearly BudgetPeriod = "yearly"
 )
 
 type Budget struct {

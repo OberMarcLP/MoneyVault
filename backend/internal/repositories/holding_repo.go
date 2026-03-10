@@ -38,15 +38,6 @@ func (r *HoldingRepository) List(userID uuid.UUID) ([]models.Holding, error) {
 	return holdings, err
 }
 
-func (r *HoldingRepository) ListByAccount(userID, accountID uuid.UUID) ([]models.Holding, error) {
-	var holdings []models.Holding
-	err := r.db.Select(&holdings, `SELECT * FROM holdings WHERE user_id = $1 AND account_id = $2 AND deleted_at IS NULL ORDER BY symbol ASC`, userID, accountID)
-	if holdings == nil {
-		holdings = []models.Holding{}
-	}
-	return holdings, err
-}
-
 func (r *HoldingRepository) Update(h *models.Holding) error {
 	query := `UPDATE holdings SET quantity = $1, cost_basis = $2, notes = $3, name = $4, updated_at = NOW()
 		WHERE id = $5 AND user_id = $6 AND deleted_at IS NULL`

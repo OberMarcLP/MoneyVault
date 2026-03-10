@@ -9,10 +9,6 @@ export function setAccessToken(token: string | null) {
   accessToken = token;
 }
 
-export function getAccessToken(): string | null {
-  return accessToken;
-}
-
 async function refreshToken(): Promise<string | null> {
   if (refreshPromise) return refreshPromise;
 

@@ -71,14 +71,3 @@ func GetUserRole(c *gin.Context) models.UserRole {
 	role, _ := c.Get("user_role")
 	return role.(models.UserRole)
 }
-
-func RejectViewer() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		if GetUserRole(c) == models.RoleViewer && c.Request.Method != "GET" {
-			c.JSON(http.StatusForbidden, gin.H{"error": "viewer role has read-only access"})
-			c.Abort()
-			return
-		}
-		c.Next()
-	}
-}

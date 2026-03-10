@@ -47,14 +47,6 @@ func (r *DividendRepository) ListByHolding(holdingID, userID uuid.UUID) ([]model
 	return divs, err
 }
 
-func (r *DividendRepository) Update(d *models.Dividend) error {
-	_, err := r.db.NamedExec(`
-		UPDATE dividends SET amount = :amount, currency = :currency, ex_date = :ex_date, pay_date = :pay_date, notes = :notes
-		WHERE id = :id AND user_id = :user_id AND deleted_at IS NULL
-	`, d)
-	return err
-}
-
 func (r *DividendRepository) Delete(id, userID uuid.UUID) error {
 	_, err := r.db.Exec(`UPDATE dividends SET deleted_at = NOW() WHERE id = $1 AND user_id = $2 AND deleted_at IS NULL`, id, userID)
 	return err

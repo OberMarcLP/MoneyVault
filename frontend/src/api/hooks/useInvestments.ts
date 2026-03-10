@@ -2,21 +2,13 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '../client';
 import type {
   Holding, PortfolioSummary, CreateHoldingRequest,
-  UpdateHoldingRequest, SellHoldingRequest, TradeLot, PriceHistory,
+  UpdateHoldingRequest, SellHoldingRequest,
 } from '@/types';
 
 export function useHoldings() {
   return useQuery({
     queryKey: ['holdings'],
     queryFn: () => apiFetch<Holding[]>('/investments'),
-  });
-}
-
-export function useHolding(id: string) {
-  return useQuery({
-    queryKey: ['holdings', id],
-    queryFn: () => apiFetch<Holding>(`/investments/${id}`),
-    enabled: !!id,
   });
 }
 
@@ -71,21 +63,6 @@ export function useSellHolding() {
       queryClient.invalidateQueries({ queryKey: ['holdings'] });
       queryClient.invalidateQueries({ queryKey: ['portfolio-summary'] });
     },
-  });
-}
-
-export function useRealizedGains() {
-  return useQuery({
-    queryKey: ['realized-gains'],
-    queryFn: () => apiFetch<TradeLot[]>('/investments/gains'),
-  });
-}
-
-export function usePriceHistory(symbol: string, days = 30) {
-  return useQuery({
-    queryKey: ['price-history', symbol, days],
-    queryFn: () => apiFetch<PriceHistory[]>(`/investments/price-history/${symbol}?days=${days}`),
-    enabled: !!symbol,
   });
 }
 

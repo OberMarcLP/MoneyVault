@@ -41,13 +41,3 @@ type CreateWalletRequest struct {
 	Network string `json:"network"`
 	Label   string `json:"label"`
 }
-
-type DeFiMetadata struct {
-	Protocol     string  `json:"protocol"`
-	PoolName     string  `json:"pool_name"`
-	Token0       string  `json:"token0"`
-	Token1       string  `json:"token1"`
-	APY          float64 `json:"apy"`
-	RewardsToken string  `json:"rewards_token"`
-	PositionType string  `json:"position_type"`
-}

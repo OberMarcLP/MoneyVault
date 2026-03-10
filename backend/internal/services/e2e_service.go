@@ -11,7 +11,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"golang.org/x/crypto/argon2"
 )
 
 type E2EService struct {
@@ -86,7 +85,7 @@ func (s *E2EService) MigrateAndEnable(userID uuid.UUID, password, e2eEncryptedDE
 	if err != nil {
 		return errors.New("internal error")
 	}
-	if !compareHashBytes(passwordHash, storedHash) {
+	if !compareHashes(passwordHash, storedHash) {
 		return errors.New("invalid password")
 	}
 
@@ -182,19 +181,4 @@ func (s *E2EService) MigrateAndDisable(userID uuid.UUID, data models.E2EMigrateD
 	}
 
 	return nil
-}
-
-func hashPassword(password string, salt []byte) []byte {
-	return argon2.IDKey([]byte(password), salt, 3, 64*1024, 4, 32)
-}
-
-func compareHashBytes(a, b []byte) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	var result byte
-	for i := range a {
-		result |= a[i] ^ b[i]
-	}
-	return result == 0
 }

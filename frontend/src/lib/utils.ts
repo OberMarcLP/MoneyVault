@@ -31,12 +31,3 @@ export function getAccountTypeLabel(type: string): string {
   };
   return labels[type] || type;
 }
-
-export function getTransactionTypeColor(type: string): string {
-  switch (type) {
-    case 'income': return 'text-success';
-    case 'expense': return 'text-destructive';
-    case 'transfer': return 'text-primary';
-    default: return '';
-  }
-}

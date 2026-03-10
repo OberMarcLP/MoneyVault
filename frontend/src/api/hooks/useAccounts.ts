@@ -9,14 +9,6 @@ export function useAccounts() {
   });
 }
 
-export function useAccount(id: string) {
-  return useQuery({
-    queryKey: ['accounts', id],
-    queryFn: () => apiFetch<{ account: Account }>(`/accounts/${id}`),
-    enabled: !!id,
-  });
-}
-
 export function useCreateAccount() {
   const queryClient = useQueryClient();
   return useMutation({
