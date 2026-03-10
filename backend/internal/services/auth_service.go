@@ -16,6 +16,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/pquerna/otp"
 	"github.com/pquerna/otp/totp"
 	"golang.org/x/crypto/argon2"
 )
@@ -160,9 +161,14 @@ func (s *AuthService) Login(req models.LoginRequest) (*models.LoginResponse, str
 		if user.TOTPSecret == nil {
 			return nil, "", errors.New("internal error")
 		}
-		if !totp.Validate(req.TOTPCode, *user.TOTPSecret) {
-			return nil, "", errors.New("invalid TOTP code")
-		}
+		valid, _ := totp.ValidateCustom(req.TOTPCode, *user.TOTPSecret, time.Now(), totp.ValidateOpts{
+				Skew:   1,
+				Digits: otp.DigitsSix,
+				Period: 30,
+			})
+			if !valid {
+				return nil, "", errors.New("invalid TOTP code")
+			}
 	}
 
 	// Reset failed attempts on successful login
@@ -263,7 +269,12 @@ func (s *AuthService) VerifyTOTP(userID uuid.UUID, code string) error {
 	if user.TOTPSecret == nil {
 		return errors.New("TOTP not set up")
 	}
-	if !totp.Validate(code, *user.TOTPSecret) {
+	valid, _ := totp.ValidateCustom(code, *user.TOTPSecret, time.Now(), totp.ValidateOpts{
+		Skew:   1,
+		Digits: otp.DigitsSix,
+		Period: 30,
+	})
+	if !valid {
 		return errors.New("invalid TOTP code")
 	}
 	user.TOTPEnabled = true
@@ -330,9 +341,7 @@ func (s *AuthService) UpdatePreferences(userID uuid.UUID, req models.UpdatePrefe
 
 func (s *AuthService) Logout(userID uuid.UUID, refreshToken string) {
 	s.enc.RemoveDEK(userID)
-	if s.dekSessionRepo != nil {
-		_ = s.dekSessionRepo.Delete(userID)
-	}
+	// Keep DEK session in DB so passkey login can restore it
 	if refreshToken != "" {
 		claims, err := s.ValidateToken(refreshToken)
 		if err == nil {

@@ -17,6 +17,8 @@ type WebAuthnCredential struct {
 	Transport       pq.StringArray `db:"transport" json:"-"`
 	SignCount       int            `db:"sign_count" json:"-"`
 	AAGUID          []byte         `db:"aaguid" json:"-"`
+	BackupEligible  bool           `db:"backup_eligible" json:"-"`
+	BackupState     bool           `db:"backup_state" json:"-"`
 	CreatedAt       time.Time      `db:"created_at" json:"created_at"`
 	LastUsedAt      *time.Time     `db:"last_used_at" json:"last_used_at"`
 }

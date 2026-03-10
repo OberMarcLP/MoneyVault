@@ -52,18 +52,8 @@ func (h *WebAuthnHandler) FinishRegistration(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "passkey registered successfully"})
 }
 
-type beginLoginRequest struct {
-	Email string `json:"email" binding:"required"`
-}
-
 func (h *WebAuthnHandler) BeginLogin(c *gin.Context) {
-	var req beginLoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "email is required"})
-		return
-	}
-
-	options, err := h.service.BeginLogin(req.Email)
+	options, err := h.service.BeginDiscoverableLogin()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -72,19 +62,13 @@ func (h *WebAuthnHandler) BeginLogin(c *gin.Context) {
 }
 
 func (h *WebAuthnHandler) FinishLogin(c *gin.Context) {
-	email := c.Query("email")
-	if email == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "email is required"})
-		return
-	}
-
 	response, err := protocol.ParseCredentialRequestResponseBody(c.Request.Body)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid credential response"})
 		return
 	}
 
-	accessToken, refreshToken, user, err := h.service.FinishLogin(email, response)
+	accessToken, refreshToken, user, err := h.service.FinishDiscoverableLogin(response)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return

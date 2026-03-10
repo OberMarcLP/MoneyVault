@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -93,6 +94,10 @@ func (s *WebAuthnService) toWebAuthnUser(user *models.User) (*webauthnUser, erro
 			PublicKey:       c.PublicKey,
 			AttestationType: c.AttestationType,
 			Transport:       transports,
+			Flags: webauthn.CredentialFlags{
+				BackupEligible: c.BackupEligible,
+				BackupState:    c.BackupState,
+			},
 			Authenticator: webauthn.Authenticator{
 				AAGUID:    c.AAGUID,
 				SignCount: uint32(c.SignCount),
@@ -206,6 +211,8 @@ func (s *WebAuthnService) FinishRegistration(userID uuid.UUID, name string, resp
 		Transport:       transports,
 		SignCount:       int(credential.Authenticator.SignCount),
 		AAGUID:          credential.Authenticator.AAGUID,
+		BackupEligible:  credential.Flags.BackupEligible,
+		BackupState:     credential.Flags.BackupState,
 	}
 
 	return s.repo.Create(dbCred)
@@ -260,6 +267,7 @@ func (s *WebAuthnService) FinishLogin(email string, response *protocol.ParsedCre
 
 	credential, err := s.wa.ValidateLogin(waUser, *session, response)
 	if err != nil {
+		log.Printf("WebAuthn login failed for %s: %v", email, err)
 		_, _ = s.userRepo.IncrementFailedAttempts(user.ID)
 		if user.FailedLoginAttempts+1 >= 10 {
 			_ = s.userRepo.LockUser(user.ID, time.Now().Add(1*time.Hour))
@@ -274,6 +282,88 @@ func (s *WebAuthnService) FinishLogin(email string, response *protocol.ParsedCre
 	if err == nil {
 		_ = s.repo.UpdateSignCount(dbCred.ID, int(credential.Authenticator.SignCount))
 	}
+
+	// Reset failed attempts
+	_ = s.userRepo.ResetFailedAttempts(user.ID)
+
+	// Restore DEK from session persistence
+	if !s.authService.RestoreDEKSession(user.ID) {
+		return "", "", nil, fmt.Errorf("session expired, please login with password to re-establish encryption keys")
+	}
+
+	// Generate tokens
+	accessToken, err := s.authService.GenerateAccessToken(user.ID, user.Role)
+	if err != nil {
+		return "", "", nil, err
+	}
+
+	refreshToken, err := s.authService.GenerateRefreshToken(user.ID, user.Role)
+	if err != nil {
+		return "", "", nil, err
+	}
+
+	return accessToken, refreshToken, user, nil
+}
+
+// BeginDiscoverableLogin starts a WebAuthn login without requiring a username.
+func (s *WebAuthnService) BeginDiscoverableLogin() (*protocol.CredentialAssertion, error) {
+	options, session, err := s.wa.BeginDiscoverableLogin()
+	if err != nil {
+		return nil, fmt.Errorf("begin login failed: %w", err)
+	}
+
+	s.storeChallenge("discoverable:"+string(session.Challenge), session)
+	return options, nil
+}
+
+// FinishDiscoverableLogin completes a discoverable WebAuthn login by identifying the user from userHandle.
+func (s *WebAuthnService) FinishDiscoverableLogin(response *protocol.ParsedCredentialAssertionData) (string, string, *models.User, error) {
+	// The handler function that resolves userHandle -> user
+	handler := func(rawID, userHandle []byte) (webauthn.User, error) {
+		if len(userHandle) != 16 {
+			return nil, fmt.Errorf("invalid user handle")
+		}
+		userID, err := uuid.FromBytes(userHandle)
+		if err != nil {
+			return nil, fmt.Errorf("invalid user handle: %w", err)
+		}
+		user, err := s.userRepo.GetByID(userID)
+		if err != nil {
+			return nil, fmt.Errorf("user not found")
+		}
+		waUser, err := s.toWebAuthnUser(user)
+		if err != nil {
+			return nil, err
+		}
+		return waUser, nil
+	}
+
+	// Find the session - we stored it with the challenge as key
+	sessionKey := "discoverable:" + string(response.Response.CollectedClientData.Challenge)
+	session, ok := s.getChallenge(sessionKey)
+	if !ok {
+		return "", "", nil, fmt.Errorf("login challenge expired, please try again")
+	}
+
+	credential, err := s.wa.ValidateDiscoverableLogin(handler, *session, response)
+	if err != nil {
+		log.Printf("WebAuthn discoverable login failed: %v", err)
+		return "", "", nil, fmt.Errorf("authentication failed")
+	}
+
+	// Look up user from credential
+	dbCred, err := s.repo.GetByCredentialID(credential.ID)
+	if err != nil {
+		return "", "", nil, fmt.Errorf("credential not found")
+	}
+
+	user, err := s.userRepo.GetByID(dbCred.UserID)
+	if err != nil {
+		return "", "", nil, fmt.Errorf("user not found")
+	}
+
+	// Update sign count
+	_ = s.repo.UpdateSignCount(dbCred.ID, int(credential.Authenticator.SignCount))
 
 	// Reset failed attempts
 	_ = s.userRepo.ResetFailedAttempts(user.ID)

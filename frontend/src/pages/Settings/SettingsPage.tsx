@@ -1,4 +1,5 @@
 import { useState, useEffect, type FormEvent } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -233,11 +234,7 @@ export function SettingsPage() {
           </p>
 
           <div className="flex justify-center p-4 bg-white rounded-lg">
-            <img
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(totpUrl)}`}
-              alt="TOTP QR Code"
-              className="w-48 h-48"
-            />
+            <QRCodeSVG value={totpUrl} size={192} />
           </div>
 
           <div className="space-y-1">

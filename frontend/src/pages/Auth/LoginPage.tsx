@@ -47,16 +47,12 @@ export function LoginPage() {
   }
 
   async function handlePasskeyLogin() {
-    if (!email || !EMAIL_RE.test(email)) {
-      setPasskeyError('Please enter your email first');
-      return;
-    }
     setPasskeyError('');
     setIsPasskeyLoading(true);
     try {
-      const { options } = await passkeyBegin.mutateAsync(email);
+      const { options } = await passkeyBegin.mutateAsync();
       const credential = await authenticatePasskey(options as unknown as Record<string, unknown>);
-      await passkeyFinish.mutateAsync({ email, credential });
+      await passkeyFinish.mutateAsync(credential);
       navigate('/');
     } catch (err) {
       setPasskeyError(err instanceof Error ? err.message : 'Passkey authentication failed');

@@ -30,10 +30,9 @@ export function useWebAuthnRegisterFinish() {
 
 export function useWebAuthnLoginBegin() {
   return useMutation({
-    mutationFn: (email: string) =>
+    mutationFn: () =>
       apiFetch<{ options: PublicKeyCredentialRequestOptions }>('/auth/webauthn/login/begin', {
         method: 'POST',
-        body: JSON.stringify({ email }),
       }),
   });
 }
@@ -41,9 +40,9 @@ export function useWebAuthnLoginBegin() {
 export function useWebAuthnLoginFinish() {
   const setUser = useAuthStore((s) => s.setUser);
   return useMutation({
-    mutationFn: async ({ email, credential }: { email: string; credential: unknown }) => {
+    mutationFn: async (credential: unknown) => {
       const data = await apiFetch<{ access_token: string; user: User }>(
-        '/auth/webauthn/login/finish?email=' + encodeURIComponent(email),
+        '/auth/webauthn/login/finish',
         { method: 'POST', body: JSON.stringify(credential) },
       );
       setAccessToken(data.access_token);

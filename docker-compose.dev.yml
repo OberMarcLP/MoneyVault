@@ -23,7 +23,7 @@ services:
       - MIGRATIONS_PATH=file://migrations
       - ENVIRONMENT=development
       - PORT=8080
-      - ALLOWED_ORIGIN=http://localhost:5173
+      - ALLOWED_ORIGIN=http://localhost
       - RATE_LIMIT_PER_MINUTE=500
     depends_on:
       db:

@@ -17,8 +17,8 @@ func NewWebAuthnRepository(db *sqlx.DB) *WebAuthnRepository {
 
 func (r *WebAuthnRepository) Create(cred *models.WebAuthnCredential) error {
 	_, err := r.db.NamedExec(`
-		INSERT INTO webauthn_credentials (id, user_id, name, credential_id, public_key, attestation_type, transport, sign_count, aaguid)
-		VALUES (:id, :user_id, :name, :credential_id, :public_key, :attestation_type, :transport, :sign_count, :aaguid)
+		INSERT INTO webauthn_credentials (id, user_id, name, credential_id, public_key, attestation_type, transport, sign_count, aaguid, backup_eligible, backup_state)
+		VALUES (:id, :user_id, :name, :credential_id, :public_key, :attestation_type, :transport, :sign_count, :aaguid, :backup_eligible, :backup_state)
 	`, cred)
 	return err
 }
