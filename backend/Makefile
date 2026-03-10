@@ -16,7 +16,7 @@ test-coverage:
 	@echo "To view HTML report: go tool cover -html=coverage.out"
 
 test-integration:
-	go test ./tests/... ./internal/repositories/... -count=1 -run Integration -v
+	go test ./tests/... ./internal/repositories/... -p 1 -count=1 -run Integration -v
 
 test-integration-setup:
 	docker compose -f ../docker-compose.test.yml up -d --wait
