@@ -124,3 +124,6 @@ jobs:
 
       - name: Build backend image
         run: docker build -t moneyvault-backend:test ./backend
+
+      - name: Build frontend image
+        run: docker build -t moneyvault-frontend:test ./frontend

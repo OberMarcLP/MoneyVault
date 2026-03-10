@@ -1,14 +1,14 @@
 services:
-  caddy:
-    image: caddy:2-alpine
+  frontend:
+    build: ./frontend
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./frontend/dist:/srv
       - caddy_data:/data
       - caddy_config:/config
+    environment:
+      - BACKEND_URL=backend:8080
     depends_on:
       - backend
     restart: unless-stopped
