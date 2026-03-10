@@ -130,7 +130,7 @@ func (h *AuthHandler) Me(c *gin.Context) {
 	userID := middleware.GetUserID(c)
 	user, err := h.service.GetUser(userID)
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "user not found", "details": err.Error(), "user_id": userID.String()})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"user": user})

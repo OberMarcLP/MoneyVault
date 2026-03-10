@@ -1,0 +1,27 @@
+linters:
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - unused
+    - ineffassign
+    - typecheck
+
+linters-settings:
+  errcheck:
+    # Don't check for errors on these functions (common patterns)
+    exclude-functions:
+      - (*database/sql.Tx).Rollback
+      - (*github.com/jmoiron/sqlx.Tx).Rollback
+      - encoding/json.Unmarshal
+
+issues:
+  exclude-rules:
+    # Relax errcheck in test files
+    - path: _test\.go
+      linters:
+        - errcheck
+    # Relax errcheck in test helpers
+    - path: testhelpers/
+      linters:
+        - errcheck
