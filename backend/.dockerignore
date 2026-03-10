@@ -1,0 +1,23 @@
+# Binaries
+bin/
+server.exe
+*.exe
+*.test
+*.out
+
+# Test files
+tests/
+*_test.go
+coverage.out
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Debug
+__debug_bin*
+
+# Docs
+docs/

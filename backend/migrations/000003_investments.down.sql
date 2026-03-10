@@ -1,0 +1,4 @@
+DROP TABLE IF EXISTS trade_lots;
+DROP TABLE IF EXISTS price_history;
+DROP TABLE IF EXISTS price_cache;
+DROP TABLE IF EXISTS holdings;

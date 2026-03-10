@@ -1,0 +1,391 @@
+basePath: /api/v1
+definitions:
+  models.AccountType:
+    enum:
+    - checking
+    - savings
+    - credit
+    - investment
+    - crypto_wallet
+    type: string
+    x-enum-varnames:
+    - AccountChecking
+    - AccountSavings
+    - AccountCredit
+    - AccountInvestment
+    - AccountCryptoWallet
+  models.CreateAccountRequest:
+    properties:
+      balance:
+        type: string
+      currency:
+        type: string
+      institution:
+        type: string
+      name:
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/models.AccountType'
+        enum:
+        - checking
+        - savings
+        - credit
+        - investment
+        - crypto_wallet
+    required:
+    - balance
+    - currency
+    - name
+    - type
+    type: object
+  models.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+      totp_code:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      e2e_encrypted_dek:
+        type: string
+      e2e_kek_salt:
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
+  models.UpdateAccountRequest:
+    properties:
+      balance:
+        type: string
+      currency:
+        type: string
+      institution:
+        type: string
+      is_active:
+        type: boolean
+      name:
+        type: string
+      type:
+        $ref: '#/definitions/models.AccountType'
+    type: object
+  models.User:
+    properties:
+      created_at:
+        type: string
+      e2e_enabled:
+        type: boolean
+      email:
+        type: string
+      email_verified:
+        type: boolean
+      id:
+        type: string
+      preferences:
+        type: object
+      role:
+        $ref: '#/definitions/models.UserRole'
+      totp_enabled:
+        type: boolean
+      updated_at:
+        type: string
+    type: object
+  models.UserRole:
+    enum:
+    - admin
+    - user
+    - viewer
+    type: string
+    x-enum-varnames:
+    - RoleAdmin
+    - RoleUser
+    - RoleViewer
+host: localhost:8080
+info:
+  contact: {}
+  description: Self-hosted personal finance API with encryption, investments, crypto,
+    and analytics.
+  title: MoneyVault API
+  version: "1.0"
+paths:
+  /accounts:
+    get:
+      description: Returns all accounts for the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: List accounts
+      tags:
+      - accounts
+    post:
+      consumes:
+      - application/json
+      description: Creates a new financial account (checking, savings, credit, investment,
+        crypto_wallet).
+      parameters:
+      - description: Account details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Create account
+      tags:
+      - accounts
+  /accounts/{id}:
+    get:
+      description: Returns a single account by ID.
+      parameters:
+      - description: Account UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get account by ID
+      tags:
+      - accounts
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing account.
+      parameters:
+      - description: Account UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Updated account details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Update account
+      tags:
+      - accounts
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login with email and password. Returns JWT access token and sets
+        refresh token cookie.
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoginResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "428":
+          description: TOTP required
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Authenticate user
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      description: Revokes refresh token and clears DEK session.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Logout user
+      tags:
+      - auth
+  /auth/me:
+    get:
+      description: Returns the authenticated user's profile.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      description: Uses refresh token cookie to issue a new access token.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Refresh access token
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account. First user becomes admin.
+      parameters:
+      - description: Registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Register a new user
+      tags:
+      - auth
+  /health:
+    get:
+      description: Returns API health status.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check
+      tags:
+      - system
+securityDefinitions:
+  BearerAuth:
+    description: Enter "Bearer {token}"
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
