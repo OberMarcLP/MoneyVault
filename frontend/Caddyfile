@@ -1,3 +1,7 @@
+{
+	auto_https {$AUTO_HTTPS:on}
+}
+
 {$SITE_ADDRESS:80} {
 	header {
 		X-Frame-Options "DENY"

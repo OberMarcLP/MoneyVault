@@ -10,6 +10,7 @@ services:
     environment:
       - BACKEND_URL=backend:8080
       - SITE_ADDRESS=${SITE_ADDRESS:-:80}
+      - AUTO_HTTPS=${AUTO_HTTPS:-on}
     depends_on:
       - backend
     restart: unless-stopped

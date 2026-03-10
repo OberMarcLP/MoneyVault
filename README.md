@@ -64,6 +64,7 @@ If you have an existing reverse proxy (nginx, Traefik, Caddy, etc.) that handles
 ```env
 ALLOWED_ORIGIN=https://your-domain.com
 SITE_ADDRESS=:80
+AUTO_HTTPS=off
 TRUSTED_PROXIES=172.18.0.0/16
 # Optional: change host port if 80 is taken
 HTTP_PORT=8180
