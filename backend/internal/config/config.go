@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -21,6 +22,7 @@ type Config struct {
 	WebAuthnRPOrigins  []string
 	VAPIDPublicKey     string
 	VAPIDPrivateKey    string
+	TrustedProxies     []string
 }
 
 func Load() *Config {
@@ -38,6 +40,7 @@ func Load() *Config {
 		WebAuthnRPOrigins:  []string{getEnv("WEBAUTHN_RP_ORIGIN", getEnv("ALLOWED_ORIGIN", "http://localhost:5173"))},
 		VAPIDPublicKey:     getEnv("VAPID_PUBLIC_KEY", ""),
 		VAPIDPrivateKey:    getEnv("VAPID_PRIVATE_KEY", ""),
+		TrustedProxies:     parseCSV(getEnv("TRUSTED_PROXIES", "")),
 	}
 
 	if cfg.Environment == "production" {
@@ -67,6 +70,21 @@ func getDuration(key string, fallback time.Duration) time.Duration {
 		}
 	}
 	return fallback
+}
+
+func parseCSV(s string) []string {
+	if s == "" {
+		return nil
+	}
+	parts := strings.Split(s, ",")
+	result := make([]string, 0, len(parts))
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			result = append(result, p)
+		}
+	}
+	return result
 }
 
 func getInt(key string, fallback int) int {

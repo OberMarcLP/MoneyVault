@@ -55,6 +55,46 @@ cd frontend && npm run build && cd ..
 docker compose up -d
 ```
 
+### Running Behind a Reverse Proxy
+
+If you have an existing reverse proxy (nginx, Traefik, Caddy, etc.) that handles TLS termination:
+
+1. **Set environment variables** in `.env`:
+
+```env
+ALLOWED_ORIGIN=https://your-domain.com
+SITE_ADDRESS=:80
+TRUSTED_PROXIES=172.18.0.0/16
+# Optional: change host port if 80 is taken
+HTTP_PORT=8180
+```
+
+2. **Start the stack:**
+
+```bash
+docker compose up -d
+```
+
+3. **Configure your reverse proxy** to forward to `http://localhost:${HTTP_PORT:-80}`.
+
+**nginx example:**
+
+```nginx
+location / {
+    proxy_pass http://127.0.0.1:8180;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+```
+
+**Find your Docker bridge CIDR** (for `TRUSTED_PROXIES`):
+
+```bash
+docker network inspect moneyvault_default | grep Subnet
+```
+
 ## Project Structure
 
 ```

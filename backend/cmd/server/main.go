@@ -209,6 +209,13 @@ func main() {
 
 	r := gin.Default()
 
+	if cfg.TrustedProxies != nil {
+		if err := r.SetTrustedProxies(cfg.TrustedProxies); err != nil {
+			log.Fatalf("Invalid TRUSTED_PROXIES configuration: %v", err)
+		}
+		log.Printf("Trusted proxies configured: %v", cfg.TrustedProxies)
+	}
+
 	r.Use(middleware.ErrorHandler())
 	r.Use(middleware.RequestLogger())
 	r.Use(middleware.SecurityHeaders())
