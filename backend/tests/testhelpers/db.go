@@ -1,7 +1,6 @@
 package testhelpers
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -65,10 +64,10 @@ func SetupTestDB(t *testing.T) *sqlx.DB {
 	return db
 }
 
-// TruncateTables truncates all application tables in reverse dependency order.
+// TruncateTables truncates all application tables in a single atomic statement
+// to avoid deadlocks when multiple test packages run in parallel.
 func TruncateTables(t *testing.T, db *sqlx.DB) {
 	t.Helper()
-	// Reverse dependency order — children first, parents last
 	tables := []string{
 		"push_subscriptions",
 		"exchange_connections",
@@ -95,10 +94,16 @@ func TruncateTables(t *testing.T, db *sqlx.DB) {
 		"accounts",
 		"users",
 	}
-	for _, table := range tables {
-		_, err := db.Exec(fmt.Sprintf("TRUNCATE TABLE %s CASCADE", table))
-		if err != nil {
-			t.Fatalf("failed to truncate %s: %v", table, err)
+	query := "TRUNCATE TABLE "
+	for i, table := range tables {
+		if i > 0 {
+			query += ", "
 		}
+		query += table
+	}
+	query += " CASCADE"
+	_, err := db.Exec(query)
+	if err != nil {
+		t.Fatalf("failed to truncate tables: %v", err)
 	}
 }

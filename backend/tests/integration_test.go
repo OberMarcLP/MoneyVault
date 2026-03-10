@@ -103,23 +103,12 @@ func TestIntegration_FullFlow(t *testing.T) {
 	require.True(t, ok, "response should contain access_token")
 	require.NotEmpty(t, accessToken)
 
-	// Extract user ID from login response for debugging
-	loginUser := loginResp["user"].(map[string]interface{})
-	userIDStr := loginUser["id"].(string)
-	t.Logf("User ID from login response: %s", userIDStr)
-
-	// Verify user exists directly in DB
-	var dbUserCount int
-	err = db.Get(&dbUserCount, "SELECT COUNT(*) FROM users WHERE id = $1", userIDStr)
-	require.NoError(t, err, "direct DB query should not error")
-	require.Equal(t, 1, dbUserCount, "user should exist in DB with ID %s", userIDStr)
-
 	// 3. Get current user
 	w = httptest.NewRecorder()
 	req, _ = http.NewRequest("GET", "/api/v1/auth/me", nil)
 	req.Header.Set("Authorization", "Bearer "+accessToken)
 	router.ServeHTTP(w, req)
-	require.Equal(t, http.StatusOK, w.Code, "GET /auth/me (userID=%s) should return 200: %s", userIDStr, w.Body.String())
+	require.Equal(t, http.StatusOK, w.Code, "GET /auth/me should return 200: %s", w.Body.String())
 
 	var meResp map[string]interface{}
 	json.Unmarshal(w.Body.Bytes(), &meResp)

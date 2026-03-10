@@ -260,11 +260,11 @@ func (s *WebAuthnService) FinishLogin(email string, response *protocol.ParsedCre
 
 	credential, err := s.wa.ValidateLogin(waUser, *session, response)
 	if err != nil {
-		s.userRepo.IncrementFailedAttempts(user.ID)
+		_, _ = s.userRepo.IncrementFailedAttempts(user.ID)
 		if user.FailedLoginAttempts+1 >= 10 {
-			s.userRepo.LockUser(user.ID, time.Now().Add(1*time.Hour))
+			_ = s.userRepo.LockUser(user.ID, time.Now().Add(1*time.Hour))
 		} else if user.FailedLoginAttempts+1 >= 5 {
-			s.userRepo.LockUser(user.ID, time.Now().Add(5*time.Minute))
+			_ = s.userRepo.LockUser(user.ID, time.Now().Add(5*time.Minute))
 		}
 		return "", "", nil, fmt.Errorf("authentication failed")
 	}
@@ -272,11 +272,11 @@ func (s *WebAuthnService) FinishLogin(email string, response *protocol.ParsedCre
 	// Update sign count
 	dbCred, err := s.repo.GetByCredentialID(credential.ID)
 	if err == nil {
-		s.repo.UpdateSignCount(dbCred.ID, int(credential.Authenticator.SignCount))
+		_ = s.repo.UpdateSignCount(dbCred.ID, int(credential.Authenticator.SignCount))
 	}
 
 	// Reset failed attempts
-	s.userRepo.ResetFailedAttempts(user.ID)
+	_ = s.userRepo.ResetFailedAttempts(user.ID)
 
 	// Restore DEK from session persistence
 	if !s.authService.RestoreDEKSession(user.ID) {

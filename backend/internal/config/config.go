@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -43,10 +42,10 @@ func Load() *Config {
 
 	if cfg.Environment == "production" {
 		if cfg.JWTSecret == "change-me-in-production" || len(cfg.JWTSecret) < 32 {
-			log.Fatal(fmt.Sprintf(
+			log.Fatalf(
 				"FATAL: JWT_SECRET is insecure (length=%d). In production, JWT_SECRET must be at least 32 characters and not the default value.",
 				len(cfg.JWTSecret),
-			))
+			)
 		}
 	}
 

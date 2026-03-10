@@ -71,10 +71,6 @@ func (h *WebAuthnHandler) BeginLogin(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"options": options})
 }
 
-type finishLoginRequest struct {
-	Email string `json:"email" binding:"required"`
-}
-
 func (h *WebAuthnHandler) FinishLogin(c *gin.Context) {
 	email := c.Query("email")
 	if email == "" {

@@ -8,8 +8,6 @@ import (
 	"time"
 )
 
-const coinbaseBaseURL = "https://api.coinbase.com/v2"
-
 type CoinbaseClient struct {
 	httpClient *http.Client
 }

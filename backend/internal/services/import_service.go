@@ -931,34 +931,6 @@ func categoryCacheKey(t models.CategoryType, name string) string {
 	return string(t) + "|" + strings.ToLower(strings.TrimSpace(name))
 }
 
-func (s *ImportService) resolveOrCreateCategory(
-	userID uuid.UUID,
-	txType models.TransactionType,
-	rawName string,
-	cache map[string]uuid.UUID,
-) (uuid.UUID, error) {
-	catType := models.CategoryExpense
-	if txType == models.TransactionIncome {
-		catType = models.CategoryIncome
-	}
-
-	name := strings.TrimSpace(rawName)
-	if name == "" {
-		return uuid.Nil, fmt.Errorf("empty category")
-	}
-	key := categoryCacheKey(catType, name)
-	if id, ok := cache[key]; ok {
-		return id, nil
-	}
-
-	cat := s.buildCategory(userID, name, catType)
-	if err := s.categoryRepo.Create(cat); err != nil {
-		return uuid.Nil, err
-	}
-	cache[key] = cat.ID
-	return cat.ID, nil
-}
-
 func (s *ImportService) resolveOrCreateCategoryTx(
 	dbTx *sqlx.Tx,
 	userID uuid.UUID,
